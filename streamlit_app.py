@@ -30,19 +30,19 @@ COLOR_FOOTNOTE = "#444444"           # Medium Grey
 COLOR_LABEL_OUTLINE = "#00000066"    # Black (semi-transparent)
 
 # Typography
-TITLE_FONT = "Roboto"
+TITLE_FONT = "DejaVu Sans"
 TITLE_SIZE = 34
 TITLE_WEIGHT = "bold"
 
-LABEL_FONT = "Liberation Sans"
+LABEL_FONT = "DejaVu Sans"
 LABEL_SIZE = 15
 LABEL_WEIGHT = "bold"
 
-LEGEND_FONT = "Liberation Sans"
+LEGEND_FONT = "DejaVu Sans"
 LEGEND_SIZE = 20
 LEGEND_WEIGHT = "bold"
 
-FOOTNOTE_FONT = "Liberation Sans"
+FOOTNOTE_FONT = "DejaVu Sans"
 FOOTNOTE_SIZE = 12
 FOOTNOTE_STYLE = "italic"
 
@@ -88,7 +88,14 @@ def fetch_tanzania_boundaries():
         ]
         
         # Create GeoDataFrame
-        gdf = gpd.GeoDataFrame.from_features(tanzania_features)
+        #gdf = gpd.GeoDataFrame.from_features(tanzania_features)
+        from shapely.geometry import shape
+        records = []
+        for feature in tanzania_features:
+            row = feature["properties"].copy()
+            row["geometry"] = shape(feature["geometry"])
+            records.append(row)
+        gdf = gpd.GeoDataFrame(records, crs="EPSG:4326")
         
         # Rename 'name' column to 'Region Name' for consistency
         if 'name' in gdf.columns:
@@ -188,7 +195,8 @@ def create_map(merged_gdf, intervention_type):
     
     for idx, row in merged_gdf.iterrows():
         # Determine color
-        if col_name in row and row[col_name] == 1:
+        #if col_name in row and row[col_name] == 1:
+        if row.get(col_name, 0) == 1:
             facecolor = surveyed_color
             is_surveyed = True
         else:
